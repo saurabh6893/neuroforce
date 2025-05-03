@@ -1,6 +1,7 @@
 const emp = [
   {
     id: 1,
+    firstName: "Monkey", // Monkey D. Luffy
     email: "employee1@example.com",
     password: "password123",
     tasks: [
@@ -35,6 +36,7 @@ const emp = [
   },
   {
     id: 2,
+    firstName: "Roronoa", // Roronoa Zoro
     email: "employee2@example.com",
     password: "password234",
     tasks: [
@@ -60,6 +62,7 @@ const emp = [
   },
   {
     id: 3,
+    firstName: "Nami",
     email: "employee3@example.com",
     password: "password345",
     tasks: [
@@ -95,6 +98,7 @@ const emp = [
   },
   {
     id: 4,
+    firstName: "Sanji",
     email: "employee4@example.com",
     password: "password456",
     tasks: [
@@ -120,6 +124,7 @@ const emp = [
   },
   {
     id: 5,
+    firstName: "Tony", // Tony Tony Chopper
     email: "employee5@example.com",
     password: "password567",
     tasks: [
@@ -148,18 +153,24 @@ const emp = [
 const admin = [
   {
     id: 1,
+    firstName: "Gol", // Gol D. Roger
     email: "admin@example.com",
     password: "adminpass",
   },
 ];
 
 export const setLocalStorage = () => {
-  localStorage.setItem("employee", JSON.stringify(emp));
-  localStorage.setItem("admin", JSON.stringify(admin));
+  localStorage.setItem("Employee", JSON.stringify(emp));
+  localStorage.setItem("Admin", JSON.stringify(admin));
 };
 
 export const getLocalStorage = () => {
-  const empData = JSON.parse(localStorage.getItem("employee") || "[]");
-
-  const adminData = JSON.parse(localStorage.getItem("admin") || "[]");
+  const empData = JSON.parse(localStorage.getItem("Employee") || "[]");
+  const adminData = JSON.parse(localStorage.getItem("Admin") || "[]");
+  return { empData, adminData };
 };
+
+
+
+// getLocalStorage pulls the emp obhject and admin object from the localStorage
+// setLocalStorage sets the emp obhject and admin object in the localStorage
