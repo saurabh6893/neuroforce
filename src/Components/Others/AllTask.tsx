@@ -78,8 +78,8 @@ const AllTask = () => {
                 key={index}
                 className={`${bgClass} mb-4 py-2 px-4 flex flex-col rounded shadow`}>
                 <div className="flex justify-between items-center">
-                  <h2 className="font-semibold">{employeeName}</h2>
-                  <h5 className="text-sm text-gray-100">{task.date}</h5>
+                  <h2 className="font-bold text-2xl">{employeeName}</h2>
+                  <h5 className="text-sm">{task.date}</h5>
                 </div>
                 <h3 className="text-lg font-medium">{task.title}</h3>
                 <p className="text-sm opacity-90">{task.description}</p>
