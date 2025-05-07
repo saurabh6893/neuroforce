@@ -153,7 +153,7 @@ const emp = [
 const admin = [
   {
     id: 1,
-    firstName: "Gol", // Gol D. Roger
+    firstName: "Gol D. Rogers", // Gol D. Roger
     email: "admin@example.com",
     password: "adminpass",
   },
@@ -169,8 +169,6 @@ export const getLocalStorage = () => {
   const adminData = JSON.parse(localStorage.getItem("Admin") || "[]");
   return { empData, adminData };
 };
-
-
 
 // getLocalStorage pulls the emp obhject and admin object from the localStorage
 // setLocalStorage sets the emp obhject and admin object in the localStorage

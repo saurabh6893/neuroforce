@@ -21,6 +21,7 @@ export type Admin = {
   id: number;
   email: string;
   password: string;
+  firstName?: string;
 };
 
 export type AuthContextType = {
@@ -29,7 +30,7 @@ export type AuthContextType = {
 };
 
 export interface EmployeeDashboardProps {
-  data: Employee | null;
+  data: Employee | Admin | null;
 }
 
 export type UserRole = "Admin" | "Employee" | "";

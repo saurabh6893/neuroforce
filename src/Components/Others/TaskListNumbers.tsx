@@ -2,6 +2,9 @@ import { EmployeeDashboardProps } from "../../types";
 import { getStatusColor } from "../../utils/Statuses";
 
 const TaskListNumbers = ({ data }: EmployeeDashboardProps) => {
+  if (!data || !("tasks" in data)) {
+    return null; // or some fallback UI
+  }
   const counts = {
     newTask: data?.tasks?.filter((task) => task.newTask).length || 0,
     completed: data?.tasks?.filter((task) => task.completed).length || 0,
