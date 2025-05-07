@@ -9,16 +9,17 @@ import { Employee, UserRole } from "./types";
 function App() {
   const [user, setUser] = useState<UserRole>("");
   const authData = useContext(AuthContext);
-  // So auth data data is basically userdata from AuthProvider
   const [loggerUserData, setLoggedUserData] = useState<Employee | null>(null);
-  // useEffect(() => {
-  //   if (authData) {
-  //     const loggedUser: any = localStorage.getItem("loggedUser");
-  //     if (loggedUser) {
-  //       setUser(loggedUser.role);
-  //     }
-  //   }
-  // }, [authData]);
+
+  useEffect(() => {
+    const loggedUser = localStorage.getItem("loggedUser");
+    console.log(loggedUser);
+    if (loggedUser) {
+      const userData = JSON.parse(loggedUser);
+      setUser(userData.role);
+      setLoggedUserData(userData.data);
+    }
+  }, []);
 
   const handleLogin = (email: string, password: string) => {
     if (email === "admin@example.com" && password === "adminpass") {
@@ -36,7 +37,7 @@ function App() {
         setLoggedUserData(employee);
         localStorage.setItem(
           "loggedUser",
-          JSON.stringify({ role: "Employee" })
+          JSON.stringify({ role: "Employee", data: employee })
         );
       }
     } else {

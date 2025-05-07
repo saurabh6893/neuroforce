@@ -21,7 +21,6 @@ const TaskList = ({ data }: EmployeeDashboardProps) => {
       {/* this block */}
       {taskData?.map((e, i) => {
         const status = getTaskStatus(e);
-        console.log(taskData);
         const bgColor = getStatusColor(status);
         return (
           <div

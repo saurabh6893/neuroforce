@@ -11,7 +11,7 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     if (!localStorage.getItem("Employee") || !localStorage.getItem("Admin")) {
       setLocalStorage();
     }
-    setLocalStorage();
+
     const { empData, adminData }: { empData: Employee[]; adminData: Admin[] } =
       getLocalStorage();
     setUserData({ empData, adminData });
