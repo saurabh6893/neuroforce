@@ -40,7 +40,7 @@ const AdminDashBoard = ({ data }: EmployeeDashboardProps) => {
                 ✕
               </button>
             </div>
-            <CreateTask />
+            <CreateTask onSuccess={() => setIsModalOpen(false)} />
           </div>
         </div>
       )}

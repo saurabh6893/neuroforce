@@ -1,13 +1,23 @@
-import React from "react";
+const CreateTask = ({ onSuccess }: { onSuccess: () => void }) => {
+  const SubmitTask = (e: React.FormEvent) => {
+    e.preventDefault();
 
-const CreateTask = () => {
+    console.log("Task submitted");
+
+    onSuccess();
+  };
+
   return (
     <div id="create-task" className="mt-10 flex justify-center">
       <div className="w-[90%] md:w-[80%] bg-[#2d2d2d] p-6 md:p-8 rounded-lg border-2 border-blue-500 shadow-lg">
         <h2 className="text-xl font-semibold text-gray-200 mb-6 flex items-center">
           <span className="mr-2 text-blue-400">Ⓒ</span> Create Task
         </h2>
-        <form className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <form
+          onSubmit={(e) => {
+            SubmitTask(e);
+          }}
+          className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <label className="block text-sm font-medium text-gray-400 mb-1">
               Task Title
