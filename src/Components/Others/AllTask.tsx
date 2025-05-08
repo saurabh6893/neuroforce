@@ -2,12 +2,13 @@ import { useEffect, useState } from "react";
 import { Employee, Task } from "../../types";
 import { getStatusColor, StatusKey } from "../../utils/Statuses";
 
-const AllTask = () => {
+const AllTask = ({
+  sortType,
+}: {
+  sortType: "name" | "statusAsc" | "statusDesc";
+}) => {
   const [tasks, setTasks] = useState<{ employeeName: string; task: Task }[]>(
     []
-  );
-  const [sortType, setSortType] = useState<"name" | "statusAsc" | "statusDesc">(
-    "name"
   );
 
   useEffect(() => {
@@ -42,7 +43,6 @@ const AllTask = () => {
 
   const statusOrderDesc = [...statusOrderAsc].reverse();
 
-  console.log(tasks);
   const sortedTasks = [...tasks].sort((a, b) => {
     if (sortType === "name") {
       return a.employeeName.localeCompare(b.employeeName);
@@ -55,19 +55,8 @@ const AllTask = () => {
   });
 
   return (
-    <div className="bg-[#1c1c1c] p-5 rounded mt-20 mb-4 h-3/4 overflow-auto text-white relative">
-      <div className="absolute top-3 right-5 text-sm">
-        <select
-          value={sortType}
-          onChange={(e) => setSortType(e.target.value as any)}
-          className="bg-[#2d2d2d] text-white p-1 rounded border border-gray-600 focus:outline-none focus:ring-1 focus:ring-blue-400">
-          <option value="name">Sort by Name A-Z</option>
-          <option value="statusAsc">Sort by Status: Failed → Completed</option>
-          <option value="statusDesc">Sort by Status: Completed → Failed</option>
-        </select>
-      </div>
-
-      <div className="mt-8">
+    <div className="bg-[#1c1c1c] p-5 rounded mt-10 mb-4 h-3/4 overflow-auto text-white">
+      <div className="mt-4">
         {sortedTasks.length === 0 ? (
           <p>No tasks available.</p>
         ) : (
