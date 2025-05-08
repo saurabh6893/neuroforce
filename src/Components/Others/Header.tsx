@@ -6,6 +6,10 @@ interface HeaderProps extends EmployeeDashboardProps {
 }
 
 const Header = ({ data, isAdmin, onCreateTaskClick }: HeaderProps) => {
+  const logoutUser = () => {
+    localStorage.setItem("loggedUser", "");
+    window.location.reload();
+  };
   return (
     <div className="flex justify-between items-end text-blue-200">
       <h1 className="text-2xl font-medium">
@@ -22,7 +26,9 @@ const Header = ({ data, isAdmin, onCreateTaskClick }: HeaderProps) => {
             + Create Task
           </button>
         )}
-        <button className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 transition">
+        <button
+          className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 transition"
+          onClick={logoutUser}>
           Logout
         </button>
       </div>
