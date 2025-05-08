@@ -39,8 +39,10 @@ const AllTask = () => {
     "active",
     "completed",
   ];
+
   const statusOrderDesc = [...statusOrderAsc].reverse();
 
+  console.log(tasks);
   const sortedTasks = [...tasks].sort((a, b) => {
     if (sortType === "name") {
       return a.employeeName.localeCompare(b.employeeName);
@@ -53,7 +55,7 @@ const AllTask = () => {
   });
 
   return (
-    <div className="bg-[#1c1c1c] p-5 rounded mt-5 mb-4 h-96 overflow-auto text-white relative">
+    <div className="bg-[#1c1c1c] p-5 rounded mt-20 mb-4 h-3/4 overflow-auto text-white relative">
       <div className="absolute top-3 right-5 text-sm">
         <select
           value={sortType}
