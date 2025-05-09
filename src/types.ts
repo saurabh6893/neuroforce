@@ -13,7 +13,7 @@ export type Employee = {
   id: number;
   email: string;
   password: string;
-  firstName: string;
+  fullName: string;
   tasks: Task[];
 };
 
@@ -21,7 +21,7 @@ export type Admin = {
   id: number;
   email: string;
   password: string;
-  firstName?: string;
+  fullName?: string;
 };
 
 export type AuthContextType = {

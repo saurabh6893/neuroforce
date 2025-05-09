@@ -15,7 +15,7 @@ const Header = ({ data, isAdmin, onCreateTaskClick }: HeaderProps) => {
       <h1 className="text-2xl font-medium">
         Hello
         <br />
-        <span className="text-3xl font-semibold"> {data?.firstName}</span>
+        <span className="text-3xl font-semibold"> {data?.fullName}</span>
       </h1>
 
       <div className="flex space-x-4">

@@ -1,14 +1,33 @@
-import { useState } from "react";
-import { EmployeeDashboardProps } from "../../types";
+import { useEffect, useState } from "react";
+import { EmployeeDashboardProps, Employee, Task } from "../../types";
 import AllTask from "../Others/AllTask";
 import CreateTask from "../Others/CreateTask";
 import Header from "../Others/Header";
+import { getLocalStorage } from "../../utils/localStorage";
 
 const AdminDashBoard = ({ data }: EmployeeDashboardProps) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [sortType, setSortType] = useState<"name" | "statusAsc" | "statusDesc">(
     "name"
   );
+  const [tasks, setTasks] = useState<{ employeeName: string; task: Task }[]>(
+    []
+  );
+
+  const fetchAllTasks = () => {
+    const { empData } = getLocalStorage();
+    const allTasks = empData.flatMap((emp: Employee) =>
+      emp.tasks.map((task) => ({
+        employeeName: emp.fullName,
+        task,
+      }))
+    );
+    setTasks(allTasks);
+  };
+
+  useEffect(() => {
+    fetchAllTasks();
+  }, []);
 
   return (
     <div className="p-10 bg-[#1c1c1c] h-screen w-full relative">
@@ -18,7 +37,6 @@ const AdminDashBoard = ({ data }: EmployeeDashboardProps) => {
         isAdmin
       />
 
-      {/* Sort control placed here */}
       <div className="mt-10 flex justify-end">
         <select
           value={sortType}
@@ -40,12 +58,17 @@ const AdminDashBoard = ({ data }: EmployeeDashboardProps) => {
                 ✕
               </button>
             </div>
-            <CreateTask onSuccess={() => setIsModalOpen(false)} />
+            <CreateTask
+              onSuccess={() => {
+                fetchAllTasks(); // 🔁 Refresh task list
+                setIsModalOpen(false); // ❌ Close modal
+              }}
+            />
           </div>
         </div>
       )}
 
-      <AllTask sortType={sortType} />
+      <AllTask sortType={sortType} tasks={tasks} />
     </div>
   );
 };

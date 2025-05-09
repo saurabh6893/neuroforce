@@ -1,8 +1,55 @@
+import { useEffect, useState } from "react";
+import { getLocalStorage } from "../../utils/localStorage";
+import InputField from "./InputFeild";
+
 const CreateTask = ({ onSuccess }: { onSuccess: () => void }) => {
+  const [taskTitle, setTaskTitle] = useState("");
+  const [taskDescription, setTaskDescription] = useState("");
+  const [taskDate, setTaskDate] = useState("");
+  const [assignee, setAssignee] = useState("");
+  const [category, setCategory] = useState("");
+  const [assigneeList, setAssigneeList] = useState<string[]>([]);
+
+  useEffect(() => {
+    const { empData } = getLocalStorage();
+    const names = empData.map((emp: any) => emp.fullName);
+    setAssigneeList(names);
+  }, []);
+
   const SubmitTask = (e: React.FormEvent) => {
     e.preventDefault();
 
-    console.log("Task submitted");
+    const task = {
+      title: taskTitle,
+      description: taskDescription,
+      date: taskDate,
+      category,
+      assignee,
+      active: false,
+      newTask: true,
+      completed: false,
+      failed: false,
+    };
+
+    const { empData } = getLocalStorage();
+
+    const updatedEmpData = empData.map((emp: any) => {
+      if (emp.fullName === assignee) {
+        return {
+          ...emp,
+          tasks: [...emp.tasks, task],
+        };
+      }
+      return emp;
+    });
+
+    localStorage.setItem("Employee", JSON.stringify(updatedEmpData));
+
+    setTaskTitle("");
+    setTaskDescription("");
+    setTaskDate("");
+    setCategory("");
+    setAssignee("");
 
     onSuccess();
   };
@@ -14,60 +61,45 @@ const CreateTask = ({ onSuccess }: { onSuccess: () => void }) => {
           <span className="mr-2 text-blue-400">Ⓒ</span> Create Task
         </h2>
         <form
-          onSubmit={(e) => {
-            SubmitTask(e);
-          }}
+          onSubmit={SubmitTask}
           className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-400 mb-1">
-              Task Title
-            </label>
-            <input
-              type="text"
-              placeholder="Make a UI design"
-              className="w-full p-2 bg-[#3d3d3d] text-white border-none rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-          </div>
+          <InputField
+            label="Task Title"
+            value={taskTitle}
+            onChange={(e) => setTaskTitle(e.target.value)}
+            placeholder="Make a UI design"
+          />
 
-          <div>
-            <label className="block text-sm font-medium text-gray-400 mb-1">
-              Assign To
-            </label>
-            <input
-              type="text"
-              placeholder="Enter assignee name"
-              className="w-full p-2 bg-[#3d3d3d] text-white border-none rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-          </div>
+          <InputField
+            label="Assign To"
+            type="select"
+            value={assignee}
+            onChange={(e) => setAssignee(e.target.value)}
+            options={assigneeList}
+          />
 
-          <div>
-            <label className="block text-sm font-medium text-gray-400 mb-1">
-              Date
-            </label>
-            <input
-              type="date"
-              className="w-full p-2 bg-[#3d3d3d] text-white border-none rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-          </div>
+          <InputField
+            label="Date"
+            type="date"
+            value={taskDate}
+            onChange={(e) => setTaskDate(e.target.value)}
+          />
 
-          <div>
-            <label className="block text-sm font-medium text-gray-400 mb-1">
-              Category
-            </label>
-            <input
-              type="text"
-              placeholder="Design, Development, etc..."
-              className="w-full p-2 bg-[#3d3d3d] text-white border-none rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-          </div>
+          <InputField
+            label="Category"
+            value={category}
+            onChange={(e) => setCategory(e.target.value)}
+            placeholder="Design, Development, etc..."
+          />
 
           <div className="md:col-span-2">
-            <label className="block text-sm font-medium text-gray-400 mb-1">
-              Description
-            </label>
-            <textarea
+            <InputField
+              label="Description"
+              type="textarea"
+              value={taskDescription}
+              onChange={(e) => setTaskDescription(e.target.value)}
               placeholder="Detailed description of the task (Max 100 words)"
-              className="w-full p-2 bg-[#3d3d3d] text-white border-none rounded h-24 resize-none focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
+            />
           </div>
 
           <div className="md:col-span-2">

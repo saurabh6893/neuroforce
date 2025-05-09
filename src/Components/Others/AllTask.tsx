@@ -1,31 +1,13 @@
-import { useEffect, useState } from "react";
-import { Employee, Task } from "../../types";
+import { Task } from "../../types";
 import { getStatusColor, StatusKey } from "../../utils/Statuses";
 
 const AllTask = ({
   sortType,
+  tasks,
 }: {
   sortType: "name" | "statusAsc" | "statusDesc";
+  tasks: { employeeName: string; task: Task }[];
 }) => {
-  const [tasks, setTasks] = useState<{ employeeName: string; task: Task }[]>(
-    []
-  );
-
-  useEffect(() => {
-    const empData: Employee[] = JSON.parse(
-      localStorage.getItem("Employee") || "[]"
-    );
-
-    const allTasks = empData.flatMap((emp) =>
-      emp.tasks.map((task) => ({
-        employeeName: emp.firstName,
-        task,
-      }))
-    );
-
-    setTasks(allTasks);
-  }, []);
-
   const getTaskStatusKey = (task: Task): StatusKey => {
     if (task.completed) return "completed";
     if (task.active) return "active";

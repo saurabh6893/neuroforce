@@ -1,7 +1,7 @@
 const emp = [
   {
     id: 1,
-    firstName: "Monkey", // Monkey D. Luffy
+    fullName: "Monkey", // Monkey D. Luffy
     email: "employee1@example.com",
     password: "password123",
     tasks: [
@@ -36,7 +36,7 @@ const emp = [
   },
   {
     id: 2,
-    firstName: "Roronoa", // Roronoa Zoro
+    fullName: "Roronoa", // Roronoa Zoro
     email: "employee2@example.com",
     password: "password234",
     tasks: [
@@ -62,7 +62,7 @@ const emp = [
   },
   {
     id: 3,
-    firstName: "Nami",
+    fullName: "Nami",
     email: "employee3@example.com",
     password: "password345",
     tasks: [
@@ -98,7 +98,7 @@ const emp = [
   },
   {
     id: 4,
-    firstName: "Sanji",
+    fullName: "Sanji",
     email: "employee4@example.com",
     password: "password456",
     tasks: [
@@ -124,7 +124,7 @@ const emp = [
   },
   {
     id: 5,
-    firstName: "Tony", // Tony Tony Chopper
+    fullName: "Tony", // Tony Tony Chopper
     email: "employee5@example.com",
     password: "password567",
     tasks: [
@@ -153,7 +153,7 @@ const emp = [
 const admin = [
   {
     id: 1,
-    firstName: "Gol D. Rogers", // Gol D. Roger
+    fullName: "Gol D. Rogers", // Gol D. Roger
     email: "admin@example.com",
     password: "adminpass",
   },
