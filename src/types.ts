@@ -27,6 +27,8 @@ export type Admin = {
 export type AuthContextType = {
   empData: Employee[];
   adminData: Admin[];
+  user?: UserRole;
+  setUser?: React.Dispatch<React.SetStateAction<UserRole>>;
 };
 
 export interface EmployeeDashboardProps {

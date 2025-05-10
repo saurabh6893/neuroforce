@@ -1,12 +1,22 @@
 import React, { createContext, useEffect, useState } from "react";
-import { Admin, AuthContextType, Employee } from "../types";
+import { Admin, AuthContextType, Employee, UserRole } from "../types";
 import { getLocalStorage, setLocalStorage } from "../utils/localStorage";
 
-export const AuthContext = createContext<AuthContextType | null>(null);
+export const AuthContext = createContext<
+  | (AuthContextType & {
+      user: UserRole;
+      setUser: React.Dispatch<React.SetStateAction<UserRole>>;
+    })
+  | null
+>(null);
 
 const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   // localStorage.clear();
-  const [userData, setUserData] = useState<AuthContextType | null>(null);
+  const [userData, setUserData] = useState<AuthContextType>({
+    empData: [],
+    adminData: [],
+  });
+  const [user, setUser] = useState<UserRole>("");
 
   useEffect(() => {
     if (!localStorage.getItem("Employee") || !localStorage.getItem("Admin")) {
@@ -19,7 +29,9 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   }, []);
 
   return (
-    <AuthContext.Provider value={userData}>{children}</AuthContext.Provider>
+    <AuthContext.Provider value={{ ...userData, user, setUser }}>
+      {children}
+    </AuthContext.Provider>
   );
 };
 

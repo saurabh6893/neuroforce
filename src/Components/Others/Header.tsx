@@ -1,4 +1,6 @@
+import { useContext } from "react";
 import { EmployeeDashboardProps } from "../../types";
+import { AuthContext } from "../../Context/AuthProvider";
 
 interface HeaderProps extends EmployeeDashboardProps {
   isAdmin?: boolean;
@@ -6,9 +8,11 @@ interface HeaderProps extends EmployeeDashboardProps {
 }
 
 const Header = ({ data, isAdmin, onCreateTaskClick }: HeaderProps) => {
+  const authData = useContext(AuthContext);
+
   const logoutUser = () => {
     localStorage.setItem("loggedUser", "");
-    window.location.reload();
+    authData?.setUser("");
   };
   return (
     <div className="flex justify-between items-end text-blue-200">
