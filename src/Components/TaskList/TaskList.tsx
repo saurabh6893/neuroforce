@@ -2,6 +2,10 @@ import { EmployeeDashboardProps } from "../../types";
 import { getStatusColor } from "../../utils/Statuses";
 
 const TaskList = ({ data }: EmployeeDashboardProps) => {
+    if (!data || !("tasks" in data)) {
+      return <div>No tasks available</div>; // or null
+    }
+
   const taskData = data?.tasks;
   // ${getStatusColor(e.)}
   const getTaskStatus = (task: any) => {
