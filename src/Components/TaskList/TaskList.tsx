@@ -1,16 +1,21 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Employee, EmployeeDashboardProps, Task } from "../../types";
 import { getStatusColor } from "../../utils/Statuses";
+import { getLocalStorage } from "../../utils/localStorage";
 
 const TaskList = ({ data }: EmployeeDashboardProps) => {
-  console.log(data);
   if (!data || !("tasks" in data)) {
     return <div>No tasks available</div>;
   }
 
   const [newData, setNewData] = useState<Employee>(data);
-  const empName = data.fullName;
   const taskData = newData.tasks;
+
+  useEffect(() => {
+    const { empData } = getLocalStorage();
+    const currentEmployee = empData.find((emp: Employee) => emp.id === data.id);
+    if (currentEmployee) setNewData(currentEmployee);
+  }, [data.id]);
 
   const getTaskStatus = (task: Task) => {
     if (task.completed) return "completed";
@@ -21,28 +26,37 @@ const TaskList = ({ data }: EmployeeDashboardProps) => {
   };
 
   const handleUpdate = (clickedTask: Task) => {
-    setNewData((prev) => {
-      const updatedTasks = prev.tasks.map((task) => {
-        if (
-          task.title === clickedTask.title &&
-          task.date === clickedTask.date
-        ) {
-          const updatedTask = { ...task };
-          updatedTask.newTask = false;
-          updatedTask.active = false;
-          updatedTask.completed = false;
-          updatedTask.failed = false;
-          if (task.newTask) {
-            updatedTask.active = true;
-          } else if (task.active) {
-            updatedTask.completed = true;
-          }
-          return updatedTask;
-        }
-        return { ...task }; // Ensure a fresh copy
-      });
-      return { ...prev, tasks: updatedTasks };
+    const { empData } = getLocalStorage();
+
+    const employeeIndex = empData.findIndex(
+      (emp: Employee) => emp.id === data.id
+    );
+    if (employeeIndex === -1) return;
+
+    const updatedTasks = empData[employeeIndex].tasks.map((task: Task) => {
+      if (task.title === clickedTask.title && task.date === clickedTask.date) {
+        return {
+          ...task,
+          ...(task.newTask
+            ? { newTask: false, active: true }
+            : task.active
+            ? { active: false, completed: true }
+            : {}),
+        };
+      }
+      return task;
     });
+
+    const newEmpData = empData.map((emp: Employee, index: any) =>
+      index === employeeIndex ? { ...emp, tasks: updatedTasks } : emp
+    );
+
+    localStorage.setItem("Employee", JSON.stringify(newEmpData));
+
+    setNewData((prev) => ({
+      ...prev,
+      tasks: updatedTasks,
+    }));
   };
 
   return (
@@ -66,7 +80,7 @@ const TaskList = ({ data }: EmployeeDashboardProps) => {
             {showButton && (
               <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2">
                 <button
-                  onClick={() => handleUpdate(task, empName)}
+                  onClick={() => handleUpdate(task)}
                   className="px-20 py-2 rounded-2xl bg-gradient-to-r from-indigo-500 to-blue-500 text-white font-semibold shadow-md transition-all duration-300 hover:shadow-lg hover:from-indigo-600 hover:to-blue-600 active:scale-95">
                   {status === "newTask" ? "Start Task" : "Complete Task"}
                 </button>
