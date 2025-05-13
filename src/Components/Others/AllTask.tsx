@@ -1,7 +1,8 @@
 import { Task } from "../../types";
 import { getStatusColor, StatusKey } from "../../utils/Statuses";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { getLocalStorage } from "../../utils/localStorage";
+import { gsap } from "gsap";
 
 const AllTask = ({
   sortType,
@@ -11,10 +12,28 @@ const AllTask = ({
   tasks: { employeeName: string; task: Task }[];
 }) => {
   const [tasks, setTasks] = useState(initialTasks);
+  const taskCardsRef = useRef<(HTMLDivElement | null)[]>([]);
 
   useEffect(() => {
     setTasks(initialTasks);
   }, [initialTasks]);
+
+  useEffect(() => {
+    if (taskCardsRef.current.length > 0) {
+      gsap.set(taskCardsRef.current, {
+        y: 100,
+        opacity: 0,
+      });
+
+      gsap.to(taskCardsRef.current, {
+        y: 0,
+        opacity: 1,
+        duration: 0.8,
+        ease: "back.out(1.2)",
+        stagger: 0.1,
+      });
+    }
+  }, [tasks, sortType]);
 
   const getTaskStatusKey = (task: Task): StatusKey => {
     if (task.completed) return "completed";
@@ -137,6 +156,7 @@ const AllTask = ({
 
             return (
               <div
+                ref={(el: any) => (taskCardsRef.current[index] = el)}
                 key={index}
                 className={`${bgClass} mb-4 py-2 px-4 flex flex-col rounded shadow`}>
                 <div className="flex justify-between items-center">
