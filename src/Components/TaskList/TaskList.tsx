@@ -1,4 +1,5 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
+import { gsap } from "gsap";
 import { Employee, EmployeeDashboardProps, Task } from "../../types";
 import { getStatusColor } from "../../utils/Statuses";
 import { getLocalStorage } from "../../utils/localStorage";
@@ -10,12 +11,27 @@ const TaskList = ({ data }: EmployeeDashboardProps) => {
 
   const [newData, setNewData] = useState<Employee>(data);
   const taskData = newData.tasks;
+  const cardsRef = useRef<(HTMLDivElement | null)[]>([]);
 
   useEffect(() => {
     const { empData } = getLocalStorage();
     const currentEmployee = empData.find((emp: Employee) => emp.id === data.id);
     if (currentEmployee) setNewData(currentEmployee);
   }, [data.id]);
+
+  useEffect(() => {
+    if (cardsRef.current.length > 0) {
+      gsap.set(cardsRef.current, { y: "400%", opacity: 0 });
+
+      gsap.to(cardsRef.current, {
+        y: 0,
+        opacity: 1,
+        duration: 0.8,
+        ease: "back.out(1.2)",
+        stagger: 0.15,
+      });
+    }
+  }, [taskData]);
 
   const getTaskStatus = (task: Task) => {
     if (task.completed) return "completed";
@@ -61,13 +77,14 @@ const TaskList = ({ data }: EmployeeDashboardProps) => {
 
   return (
     <div className="h-[55%] overflow-x-auto flex items-center justify-start flex-nowrap w-full gap-5 py-5 mt-10">
-      {taskData?.map((task) => {
+      {taskData?.map((task, index) => {
         const status = getTaskStatus(task);
         const bgColor = getStatusColor(status);
         const showButton = !task.completed && !task.failed;
 
         return (
           <div
+            ref={(el: any) => (cardsRef.current[index] = el)}
             key={`${task.title}-${task.date}`}
             className={`flex-shrink-0 ${bgColor} h-full w-[300px] p-5 rounded-xl relative`}>
             <div className="flex justify-between items-center">
