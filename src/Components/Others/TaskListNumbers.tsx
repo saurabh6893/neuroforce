@@ -2,6 +2,7 @@ import { useMemo, useEffect, useState } from "react";
 import { Employee, EmployeeDashboardProps } from "../../types";
 import { getStatusColor } from "../../utils/Statuses";
 import { getLocalStorage } from "../../utils/localStorage";
+import ErrorBoundary from "../Common/ErrorBoundary";
 
 type TaskStatus = "newTask" | "completed" | "active" | "failed";
 
@@ -59,18 +60,20 @@ const TaskListNumbers = ({ data }: EmployeeDashboardProps) => {
   ];
 
   return (
-    <div className="grid grid-cols-2 gap-4 p-4">
-      {statusCards.map(({ key, label, count }) => (
-        <div
-          key={key}
-          className={`py-6 px-6 rounded-xl ${getStatusColor(
-            key
-          )} text-white shadow-lg hover:shadow-xl transition-shadow duration-300`}>
-          <h2 className="text-4xl font-bold">{count}</h2>
-          <h3 className="text-lg font-medium opacity-90">{label}</h3>
-        </div>
-      ))}
-    </div>
+    <ErrorBoundary fallback={<div>Stats unavailable!</div>}>
+      <div className="grid grid-cols-2 gap-4 p-4">
+        {statusCards.map(({ key, label, count }) => (
+          <div
+            key={key}
+            className={`py-6 px-6 rounded-xl ${getStatusColor(
+              key
+            )} text-white shadow-lg hover:shadow-xl transition-shadow duration-300`}>
+            <h2 className="text-4xl font-bold">{count}</h2>
+            <h3 className="text-lg font-medium opacity-90">{label}</h3>
+          </div>
+        ))}
+      </div>
+    </ErrorBoundary>
   );
 };
 

@@ -8,6 +8,7 @@ import NotFound from "./Components/Common/NotFound";
 import { Admin, Employee } from "./types";
 import "./App.css";
 import { ROUTES } from "./constants/routes";
+import ErrorBoundary from "./Components/Common/ErrorBoundary";
 
 function App() {
   const authData = useContext(AuthContext);
@@ -79,11 +80,13 @@ function App() {
       <Route
         path={ROUTES.ADMIN_HOME}
         element={
-          authData?.user === "Admin" ? (
-            <AdminDashBoard data={loggerUserData} />
-          ) : (
-            <Navigate to="/login" />
-          )
+          <ErrorBoundary>
+            {authData?.user === "Admin" ? (
+              <AdminDashBoard data={loggerUserData} />
+            ) : (
+              <Navigate to="/login" />
+            )}
+          </ErrorBoundary>
         }
       />
 
