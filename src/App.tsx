@@ -1,16 +1,20 @@
 import { useContext, useEffect, useState } from "react";
-import "./App.css";
-import AdminDashBoard from "./Components/Dashboard/AdminDashBoard";
-import Login from "./Components/Auth/Login";
-import EmployeeDashboard from "./Components/Dashboard/EmployeeDashboard";
+import { Routes, Route, Navigate, useNavigate } from "react-router-dom";
 import { AuthContext } from "./Context/AuthProvider";
+import Login from "./Components/Auth/Login";
+import AdminDashBoard from "./Components/Dashboard/AdminDashBoard";
+import EmployeeDashboard from "./Components/Dashboard/EmployeeDashboard";
+import NotFound from "./Components/Common/NotFound";
 import { Admin, Employee } from "./types";
+import "./App.css";
+import { ROUTES } from "./constants/routes";
 
 function App() {
   const authData = useContext(AuthContext);
   const [loggerUserData, setLoggedUserData] = useState<Employee | Admin | null>(
     null
   );
+  const navigate = useNavigate();
 
   useEffect(() => {
     const loggedUser = localStorage.getItem("loggedUser");
@@ -24,18 +28,19 @@ function App() {
   const handleLogin = (email: string, password: string) => {
     if (email === "admin@example.com" && password === "adminpass") {
       const admin = authData?.adminData?.[0];
-      authData?.setUser("Admin");
-      admin && setLoggedUserData(admin);
-      localStorage.setItem(
-        "loggedUser",
-        JSON.stringify({ role: "Admin", data: admin })
-      );
+      if (admin) {
+        authData?.setUser("Admin");
+        setLoggedUserData(admin);
+        localStorage.setItem(
+          "loggedUser",
+          JSON.stringify({ role: "Admin", data: admin })
+        );
+        navigate(ROUTES.ADMIN_HOME);
+      }
     } else if (authData) {
       const employee = authData.empData.find(
         (e) => email === e.email && e.password === password
       );
-
-      // employee is just the employee data from the data storred in local storage aka specific employee from list of data we created
 
       if (employee) {
         authData.setUser("Employee");
@@ -44,22 +49,59 @@ function App() {
           "loggedUser",
           JSON.stringify({ role: "Employee", data: employee })
         );
+        navigate(ROUTES.EMPLOYEE_HOME(employee.fullName));
+      } else {
+        alert("Invalid credentials");
       }
-    } else {
-      alert("Invalid credentials");
     }
   };
 
   return (
-    <>
-      {!authData?.user ? <Login handleLogin={handleLogin} /> : ""}
-      {authData?.user == "Admin" ? (
-        <AdminDashBoard data={loggerUserData} />
-      ) : authData?.user == "Employee" ? (
-        <EmployeeDashboard data={loggerUserData} />
-      ) : null}
-      ;
-    </>
+    <Routes>
+      <Route
+        path={ROUTES.LOGIN}
+        element={
+          !authData?.user ? (
+            <Login handleLogin={handleLogin} />
+          ) : authData.user === "Admin" ? (
+            <Navigate to="/admin/home" />
+          ) : (
+            <Navigate
+              to={`/employee/${loggerUserData?.fullName?.replace(
+                /\s+/g,
+                "-"
+              )}/home`}
+            />
+          )
+        }
+      />
+
+      <Route
+        path={ROUTES.ADMIN_HOME}
+        element={
+          authData?.user === "Admin" ? (
+            <AdminDashBoard data={loggerUserData} />
+          ) : (
+            <Navigate to="/login" />
+          )
+        }
+      />
+
+      <Route
+        path={ROUTES.EMPLOYEE_HOME(":fullName")}
+        element={
+          authData?.user === "Employee" ? (
+            <EmployeeDashboard data={loggerUserData} />
+          ) : (
+            <Navigate to="/login" />
+          )
+        }
+      />
+
+      <Route path="/" element={<Navigate to="/login" />} />
+      <Route path={ROUTES.NOT_FOUND} element={<NotFound />} />
+    </Routes>
   );
 }
+
 export default App;

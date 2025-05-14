@@ -31,6 +31,10 @@ export type AuthContextType = {
   setUser?: React.Dispatch<React.SetStateAction<UserRole>>;
 };
 
+export type EmployeeRouteParams = {
+  fullName: string;
+};
+
 export interface EmployeeDashboardProps {
   data: Employee | Admin | null;
 }
