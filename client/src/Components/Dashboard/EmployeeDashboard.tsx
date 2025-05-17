@@ -1,5 +1,5 @@
 import { useContext, useEffect, useState } from "react";
-import { Navigate, useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import axios from "axios";
 import { AuthContext } from "../../Context/AuthProvider";
 import Header from "../Others/Header";
@@ -15,6 +15,7 @@ interface EmployeeDashboardProps {
 const EmployeeDashboard = ({ data }: EmployeeDashboardProps) => {
   const { fullName } = useParams();
   const authData = useContext(AuthContext);
+  const navigate = useNavigate();
   const [tasks, setTasks] = useState<Task[]>([]);
   const [error, setError] = useState("");
   const [sortType, setSortType] = useState<"title" | "dateAsc" | "dateDesc">(
@@ -53,17 +54,23 @@ const EmployeeDashboard = ({ data }: EmployeeDashboardProps) => {
   }, [authData?.token, data?._id]);
 
   // Normalize fullName for comparison
-  const normalizedParam = fullName?.replace(/-/g, " ").trim();
-  const normalizedData = data?.fullName?.trim();
+  const normalizedParam = fullName?.replace(/-/g, " ").trim().toLowerCase();
+  const normalizedData = data?.fullName?.trim().toLowerCase();
+
+  useEffect(() => {
+    if (!data || !fullName || normalizedParam !== normalizedData) {
+      console.log("Redirecting to login:", {
+        data,
+        fullName,
+        normalizedParam,
+        normalizedData,
+      });
+      navigate(ROUTES.LOGIN, { replace: true });
+    }
+  }, [data, fullName, normalizedParam, normalizedData, navigate]);
 
   if (!data || !fullName || normalizedParam !== normalizedData) {
-    console.log("Navigation triggered:", {
-      data,
-      fullName,
-      normalizedParam,
-      normalizedData,
-    });
-    return <Navigate to={ROUTES.LOGIN} replace />;
+    return null; // Prevent rendering until redirect
   }
 
   return (

@@ -1,110 +1,64 @@
-import { useContext, useEffect, useState } from "react";
-import { Routes, Route, Navigate, useNavigate } from "react-router-dom";
-import { AuthContext } from "./Context/AuthProvider";
+import { useState, useContext } from "react";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import axios from "axios";
+import AuthProvider, { AuthContext } from "./Context/AuthProvider";
+
+import { ROUTES } from "./constants/routes";
+import { Employee, Admin } from "./types";
 import Login from "./Components/Auth/Login";
 import AdminDashBoard from "./Components/Dashboard/AdminDashBoard";
 import EmployeeDashboard from "./Components/Dashboard/EmployeeDashboard";
-import NotFound from "./Components/Common/NotFound";
-import { Admin, Employee } from "./types";
-import "./App.css";
-import { ROUTES } from "./constants/routes";
-import ErrorBoundary from "./Components/Common/ErrorBoundary";
 
-function App() {
+const App = () => {
+  const [data, setData] = useState<Employee | Admin | null>(null);
   const authData = useContext(AuthContext);
-  const [loggerUserData, setLoggedUserData] = useState<Employee | Admin | null>(
-    null
-  );
-  const navigate = useNavigate();
 
-  useEffect(() => {
-    const loggedUser = localStorage.getItem("loggedUser");
-    if (loggedUser) {
-      const userData = JSON.parse(loggedUser);
-      authData?.setUser(userData.role);
-      setLoggedUserData(userData.data);
-    }
-  }, [authData?.user]);
-
-  const handleLogin = (email: string, password: string) => {
-    if (email === "admin@example.com" && password === "adminpass") {
-      const admin = authData?.adminData?.[0];
-      if (admin) {
-        authData?.setUser("Admin");
-        setLoggedUserData(admin);
-        localStorage.setItem(
-          "loggedUser",
-          JSON.stringify({ role: "Admin", data: admin })
-        );
-        navigate(ROUTES.ADMIN_HOME);
-      }
-    } else if (authData) {
-      const employee = authData.empData.find(
-        (e) => email === e.email && e.password === password
+  const handleLogin = async (email: string, password: string) => {
+    try {
+      const response = await axios.post(
+        "http://localhost:5000/api/auth/login",
+        {
+          email,
+          password,
+        }
       );
-
-      if (employee) {
-        authData.setUser("Employee");
-        setLoggedUserData(employee);
-        localStorage.setItem(
-          "loggedUser",
-          JSON.stringify({ role: "Employee", data: employee })
-        );
-        navigate(ROUTES.EMPLOYEE_HOME(employee.fullName));
-      } else {
-        alert("Invalid credentials");
-      }
+      const { token, role, fullName } = response.data;
+      authData?.setToken?.(token);
+      authData?.setUser?.(role);
+      localStorage.setItem("token", token);
+      setData({
+        email,
+        fullName,
+        role,
+        id: Date.now(),
+        _id: response.data.userId,
+      });
+    } catch (error) {
+      console.error("Login error:", error);
+      throw new Error("Login failed");
     }
   };
 
   return (
-    <Routes>
-      <Route
-        path={ROUTES.LOGIN}
-        element={
-          !authData?.user ? (
-            <Login handleLogin={handleLogin} />
-          ) : authData.user === "Admin" ? (
-            <Navigate to="/admin/home" />
-          ) : (
-            <Navigate
-              to={`/employee/${loggerUserData?.fullName?.replace(
-                /\s+/g,
-                "-"
-              )}/home`}
-            />
-          )
-        }
-      />
-
-      <Route
-        path={ROUTES.ADMIN_HOME}
-        element={
-          <ErrorBoundary>
-            {authData?.user === "Admin" ? (
-              <AdminDashBoard data={loggerUserData} />
-            ) : (
-              <Navigate to="/login" />
-            )}
-          </ErrorBoundary>
-        }
-      />
-
-      <Route
-        path={ROUTES.EMPLOYEE_HOME(":fullName")}
-        element={
-          authData?.user === "Employee" ? (
-            <EmployeeDashboard data={loggerUserData} />
-          ) : (
-            <Navigate to="/login" />
-          )
-        }
-      />
-
-      <Route path="/" element={<Navigate to="/login" />} />
-      <Route path={ROUTES.NOT_FOUND} element={<NotFound />} />
-    </Routes>
+    <AuthProvider>
+      <BrowserRouter>
+        <Routes>
+          <Route
+            path={ROUTES.LOGIN}
+            element={<Login handleLogin={handleLogin} />}
+          />
+          <Route
+            path={ROUTES.ADMIN_HOME}
+            element={<AdminDashBoard data={data} />}
+          />
+          <Route
+            path="/employee/:fullName/home"
+            element={<EmployeeDashboard data={data} />}
+          />
+        </Routes>
+      </BrowserRouter>
+    </AuthProvider>
   );
-}
+};
 
 export default App;
