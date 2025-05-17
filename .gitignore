@@ -1,25 +1,40 @@
-# Logs
-logs
-*.log
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-pnpm-debug.log*
-lerna-debug.log*
+Node modules
 
-node_modules
-dist
-dist-ssr
+node_modules/ client/node_modules/ server/node_modules/
+
+Build outputs
+
+client/dist/ client/dist-ssr/ server/dist/
+
+Environment variables
+
+.env client/.env client/.env.* server/.env server/.env.*
+
+Logs
+
+logs .log npm-debug.logyarn-debug.log* yarn-error.log* pnpm-debug.log* lerna-debug.log*
+
+Vite cache
+
+client/.vite/
+
+TypeScript build info
+
+*.tsbuildinfo
+
+Editor directories and files
+
+.vscode/* !.vscode/extensions.json .idea/ .DS_Store *.suo .ntvs*.njsproj *.sln *.sw?
+
+Local development files
 *.local
 
-# Editor directories and files
-.vscode/*
-!.vscode/extensions.json
-.idea
-.DS_Store
-*.suo
-*.ntvs*
-*.njsproj
-*.sln
-*.sw?
-.vite/
+Dependency lock files (optional, uncomment if you don't want to commit them)
+
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+
+
+
