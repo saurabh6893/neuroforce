@@ -9,6 +9,11 @@ export const register = async (req, res) => {
         .status(400)
         .json({ message: "Email, password, and role are required" });
     }
+    if (!["Admin", "Employee"].includes(role)) {
+      return res
+        .status(400)
+        .json({ message: "Role must be Admin or Employee" });
+    }
     const existingUser = await User.findOne({ email });
     if (existingUser) {
       return res.status(400).json({ message: "Email already exists" });
@@ -27,6 +32,11 @@ export const register = async (req, res) => {
 export const login = async (req, res) => {
   const { email, password } = req.body;
   try {
+    if (!email || !password) {
+      return res
+        .status(400)
+        .json({ message: "Email and password are required" });
+    }
     const user = await User.findOne({ email });
     if (!user || !(await user.comparePassword(password))) {
       return res.status(401).json({ message: "Invalid credentials" });
