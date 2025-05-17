@@ -22,19 +22,26 @@ const Login = () => {
           password,
         }
       );
-      const { token, user } = response.data;
+      const { token, role, fullName } = response.data;
+      if (!token || !role || !fullName) {
+        throw new Error("Invalid login response");
+      }
       authData?.setToken?.(token);
-      authData?.setUser?.(user.role);
+      authData?.setUser?.(role);
       localStorage.setItem("token", token);
       setEmail("");
       setPassword("");
-      navigate(
-        user.role === "Admin"
-          ? ROUTES.ADMIN_HOME
-          : `/employee/${user.fullName.replace(/\s+/g, "-")}/home`
-      );
+      if (role === "Admin") {
+        navigate(ROUTES.ADMIN_HOME);
+      } else {
+        navigate(`/employee/${fullName.replace(/\s+/g, "-")}/home`);
+      }
     } catch (err: any) {
-      setError(err.response?.data?.message || "Login failed");
+      console.error("Login error:", err);
+      setError(
+        err.response?.data?.message ||
+          "Login failed. Please check your credentials."
+      );
     }
   };
 

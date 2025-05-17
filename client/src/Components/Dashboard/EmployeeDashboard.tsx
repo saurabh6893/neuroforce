@@ -45,13 +45,24 @@ const EmployeeDashboard = ({ data }: EmployeeDashboardProps) => {
           setTasks(mappedTasks);
           authData?.setTasks?.(mappedTasks);
         })
-        .catch(() => {
+        .catch((err) => {
+          console.error("Fetch tasks error:", err);
           setError("Failed to fetch tasks");
         });
     }
   }, [authData?.token, data?._id]);
 
-  if (data?.fullName?.replace(/\s+/g, "-") !== fullName) {
+  // Normalize fullName for comparison
+  const normalizedParam = fullName?.replace(/-/g, " ").trim();
+  const normalizedData = data?.fullName?.trim();
+
+  if (!data || !fullName || normalizedParam !== normalizedData) {
+    console.log("Navigation triggered:", {
+      data,
+      fullName,
+      normalizedParam,
+      normalizedData,
+    });
     return <Navigate to={ROUTES.LOGIN} replace />;
   }
 
