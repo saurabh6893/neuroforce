@@ -1,42 +1,49 @@
-// types.ts
-export type Task = {
+export type UserRole = "Admin" | "Employee" | "";
+
+export interface Task {
+  _id: string;
   title: string;
   description: string;
-  date: string;
-  active: boolean;
-  newTask: boolean;
-  completed: boolean;
-  failed: boolean;
-};
+  date: string; // Maps to createdAt
+  active: boolean; // status: Accepted
+  newTask: boolean; // status: New
+  completed: boolean; // status: Completed
+  failed: boolean; // status: Failed
+  assignedTo?: { _id: string; fullName: string };
+  createdBy: string;
+}
 
-export type Employee = {
+export interface Employee {
   id: number;
+  _id: string;
   email: string;
   password: string;
   fullName: string;
-  tasks: Task[];
-};
+}
 
-export type Admin = {
+export interface Admin {
   id: number;
+  _id: string;
   email: string;
   password: string;
   fullName?: string;
-};
+}
 
-export type AuthContextType = {
+export interface AuthContextType {
   empData: Employee[];
   adminData: Admin[];
-  user?: UserRole;
-  setUser?: React.Dispatch<React.SetStateAction<UserRole>>;
-};
+  user: UserRole;
+  setUser: React.Dispatch<React.SetStateAction<UserRole>>;
+  token: string | null;
+  setToken: React.Dispatch<React.SetStateAction<string | null>>;
+  tasks: Task[];
+  setTasks: React.Dispatch<React.SetStateAction<Task[]>>;
+}
+
+export interface EmployeeDashboardProps {
+  data: Employee | null;
+}
 
 export type EmployeeRouteParams = {
   fullName: string;
 };
-
-export interface EmployeeDashboardProps {
-  data: Employee | Admin | null;
-}
-
-export type UserRole = "Admin" | "Employee" | "";

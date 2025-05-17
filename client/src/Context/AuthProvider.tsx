@@ -1,41 +1,37 @@
-import React, { createContext, useEffect, useState } from "react";
-import { Admin, AuthContextType, Employee, UserRole } from "../types";
-import { getLocalStorage, setLocalStorage } from "../utils/localStorage";
+import { createContext, useState, ReactNode } from "react";
+import { AuthContextType, Task } from "../types";
 
-export const AuthContext = createContext<
-  | (AuthContextType & {
-      user: UserRole;
-      setUser: React.Dispatch<React.SetStateAction<UserRole>>;
-    })
-  | null
->(null);
+export const AuthContext = createContext<AuthContextType | undefined>(
+  undefined
+);
 
-const AuthProvider = ({ children }: { children: React.ReactNode }) => {
-  // localStorage.clear();
-  const [userData, setUserData] = useState<AuthContextType>({
-    empData: [],
-    adminData: [],
-  });
-  const [user, setUser] = useState<UserRole>("");
+interface AuthProviderProps {
+  children: ReactNode;
+}
 
-  useEffect(() => {
-    if (!localStorage.getItem("Employee") || !localStorage.getItem("Admin")) {
-      setLocalStorage();
-    }
-
-    const { empData, adminData }: { empData: Employee[]; adminData: Admin[] } =
-      getLocalStorage();
-    setUserData({ empData, adminData });
-  }, []);
+const AuthProvider = ({ children }: AuthProviderProps) => {
+  const [empData, setEmpData] = useState<AuthContextType["empData"]>([]);
+  const [adminData, setAdminData] = useState<AuthContextType["adminData"]>([]);
+  const [user, setUser] = useState<AuthContextType["user"]>("");
+  const [token, setToken] = useState<string | null>(null);
+  const [tasks, setTasks] = useState<Task[]>([]);
 
   return (
-    <AuthContext.Provider value={{ ...userData, user, setUser }}>
+    <AuthContext.Provider
+      value={{
+        empData,
+        adminData,
+        user,
+        setUser,
+        token,
+        setToken,
+        tasks,
+        setTasks,
+      }}>
       {children}
     </AuthContext.Provider>
   );
 };
-
-export default AuthProvider;
 
 // when the app loads
 // thr getLocalStorage pulls the initial data and feeds it to Local storage
@@ -43,3 +39,5 @@ export default AuthProvider;
 // and  is the then set as UserData
 // userdata is passed to AuthContext
 // auth context is availble to use across app
+
+export default AuthProvider;

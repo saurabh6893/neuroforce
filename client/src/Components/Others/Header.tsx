@@ -1,42 +1,47 @@
 import { useContext } from "react";
-import { EmployeeDashboardProps } from "../../types";
+import { useNavigate } from "react-router-dom";
 import { AuthContext } from "../../Context/AuthProvider";
+import { Employee, Admin } from "../../types";
+import { ROUTES } from "../../constants/routes";
 
-interface HeaderProps extends EmployeeDashboardProps {
-  isAdmin?: boolean;
+interface HeaderProps {
+  data: Employee | Admin | null;
   onCreateTaskClick?: () => void;
+  isAdmin?: boolean;
 }
 
-const Header = ({ data, isAdmin, onCreateTaskClick }: HeaderProps) => {
+const Header = ({ data, onCreateTaskClick, isAdmin }: HeaderProps) => {
   const authData = useContext(AuthContext);
+  const navigate = useNavigate();
 
-  const logoutUser = () => {
-    localStorage.setItem("loggedUser", "");
-    authData?.setUser("");
+  const handleLogout = () => {
+    authData?.setToken?.(null);
+    authData?.setUser?.("");
+    localStorage.removeItem("token");
+    navigate(ROUTES.LOGIN);
   };
-  return (
-    <div className="flex justify-between items-end text-blue-200">
-      <h1 className="text-2xl font-medium">
-        Hello
-        <br />
-        <span className="text-3xl font-semibold"> {data?.fullName}</span>
-      </h1>
 
-      <div className="flex space-x-4">
-        {isAdmin && (
+  return (
+    <header className="flex justify-between items-center p-4 bg-[#2d2d2d]">
+      <h1 className="text-xl font-bold text-white">Neuroforce Task Manager</h1>
+      <div className="flex items-center gap-4">
+        <span className="text-white">Welcome, {data?.fullName}</span>
+        {isAdmin && onCreateTaskClick && (
           <button
             onClick={onCreateTaskClick}
-            className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition">
-            + Create Task
+            className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
+            Create Task
           </button>
         )}
-        <button
-          className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 transition"
-          onClick={logoutUser}>
-          Logout
-        </button>
+        {authData?.token && (
+          <button
+            onClick={handleLogout}
+            className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600">
+            Logout
+          </button>
+        )}
       </div>
-    </div>
+    </header>
   );
 };
 

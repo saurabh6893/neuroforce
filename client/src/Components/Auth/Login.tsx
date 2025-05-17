@@ -1,27 +1,49 @@
-import { useState, FormEvent } from "react";
+import { useState, FormEvent, useContext } from "react";
+import { useNavigate } from "react-router-dom";
+import axios from "axios";
+import { AuthContext } from "../../Context/AuthProvider";
+import { ROUTES } from "../../constants/routes";
 
-interface LoginProps {
-  handleLogin: (email: string, password: string) => void;
-}
-
-const Login = ({ handleLogin }: LoginProps) => {
+const Login = () => {
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
+  const [error, setError] = useState<string>("");
+  const authData = useContext(AuthContext);
+  const navigate = useNavigate();
 
-  const submitFunc = (e: FormEvent<HTMLFormElement>) => {
+  const submitFunc = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    handleLogin(email, password);
-    setEmail("");
-    setPassword("");
+    try {
+      setError("");
+      const response = await axios.post(
+        "http://localhost:5000/api/auth/login",
+        {
+          email,
+          password,
+        }
+      );
+      const { token, user } = response.data;
+      authData?.setToken?.(token);
+      authData?.setUser?.(user.role);
+      localStorage.setItem("token", token);
+      setEmail("");
+      setPassword("");
+      navigate(
+        user.role === "Admin"
+          ? ROUTES.ADMIN_HOME
+          : `/employee/${user.fullName.replace(/\s+/g, "-")}/home`
+      );
+    } catch (err: any) {
+      setError(err.response?.data?.message || "Login failed");
+    }
   };
 
   return (
     <div className="flex h-screen w-screen items-center justify-center bg-gray-900">
       <form
-        className="flex flex-col items-center space-y-6 p-48 bg-gray-800 rounded-lg shadow-lg"
+        className="flex flex-col items-center space-y-6 p-8 bg-gray-800 rounded-lg shadow-lg"
         onSubmit={submitFunc}>
-        <>{email}</>
-        {password}
+        {error && <p className="text-red-500">{error}</p>}
         <input
           type="email"
           required
