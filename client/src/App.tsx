@@ -23,39 +23,47 @@ function App() {
       const userData = JSON.parse(loggedUser);
       authData?.setUser(userData.role);
       setLoggedUserData(userData.data);
-    }
-  }, [authData?.user]);
 
-  const handleLogin = (email: string, password: string) => {
-    if (email === "admin@example.com" && password === "adminpass") {
-      const admin = authData?.adminData?.[0];
-      if (admin) {
-        authData?.setUser("Admin");
-        setLoggedUserData(admin);
-        localStorage.setItem(
-          "loggedUser",
-          JSON.stringify({ role: "Admin", data: admin })
-        );
+      if (userData.role === "Admin") {
         navigate(ROUTES.ADMIN_HOME);
-      }
-    } else if (authData) {
-      const employee = authData.empData.find(
-        (e) => email === e.email && e.password === password
-      );
-
-      if (employee) {
-        authData.setUser("Employee");
-        setLoggedUserData(employee);
-        localStorage.setItem(
-          "loggedUser",
-          JSON.stringify({ role: "Employee", data: employee })
+      } else if (userData.role === "Employee") {
+        navigate(
+          ROUTES.EMPLOYEE_HOME(userData.data.fullName.replace(/\s+/g, "-"))
         );
-        navigate(ROUTES.EMPLOYEE_HOME(employee.fullName));
-      } else {
-        alert("Invalid credentials");
       }
     }
-  };
+  }, [authData?.user, navigate]);
+
+  // const handleLogin = (email: string, password: string) => {
+  //   if (email === "admin@example.com" && password === "adminpass") {
+  //     const admin = authData?.adminData?.[0];
+  //     if (admin) {
+  //       authData?.setUser("Admin");
+  //       setLoggedUserData(admin);
+  //       localStorage.setItem(
+  //         "loggedUser",
+  //         JSON.stringify({ role: "Admin", data: admin })
+  //       );
+  //       navigate(ROUTES.ADMIN_HOME);
+  //     }
+  //   } else if (authData) {
+  //     const employee = authData.empData.find(
+  //       (e) => email === e.email && e.password === password
+  //     );
+
+  //     if (employee) {
+  //       authData.setUser("Employee");
+  //       setLoggedUserData(employee);
+  //       localStorage.setItem(
+  //         "loggedUser",
+  //         JSON.stringify({ role: "Employee", data: employee })
+  //       );
+  //       navigate(ROUTES.EMPLOYEE_HOME(employee.fullName));
+  //     } else {
+  //       alert("Invalid credentials");
+  //     }
+  //   }
+  // };
 
   return (
     <Routes>
@@ -63,7 +71,7 @@ function App() {
         path={ROUTES.LOGIN}
         element={
           !authData?.user ? (
-            <Login handleLogin={handleLogin} />
+            <Login />
           ) : authData.user === "Admin" ? (
             <Navigate to="/admin/home" />
           ) : (

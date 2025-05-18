@@ -1,16 +1,15 @@
-import { useState, FormEvent } from "react";
+import { useState, FormEvent, useContext } from "react";
+import { AuthContext } from "../../Context/AuthProvider";
 
-interface LoginProps {
-  handleLogin: (email: string, password: string) => void;
-}
-
-const Login = ({ handleLogin }: LoginProps) => {
+const Login = () => {
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
+  const authData = useContext(AuthContext);
 
   const submitFunc = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    handleLogin(email, password);
+
+    authData?.loginWithBackend(email, password);
     setEmail("");
     setPassword("");
   };
@@ -20,8 +19,6 @@ const Login = ({ handleLogin }: LoginProps) => {
       <form
         className="flex flex-col items-center space-y-6 p-48 bg-gray-800 rounded-lg shadow-lg"
         onSubmit={submitFunc}>
-        <>{email}</>
-        {password}
         <input
           type="email"
           required
