@@ -29,7 +29,7 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     setUserData({ empData, adminData });
   }, []);
 
-  // Extract existing auth logic into a reusable function
+  // Extracting existing auth logic into a reusable function
   const handleLocalAuth = (email: string, password: string) => {
     if (email === "admin@example.com" && password === "adminpass") {
       const admin = userData.adminData?.[0];
@@ -78,7 +78,7 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       );
       setUser(data.role);
     } catch (err) {
-      // Fallback to local storage auth
+      // this is for Fallback to local storage auth
       handleLocalAuth(email, password);
     }
   };

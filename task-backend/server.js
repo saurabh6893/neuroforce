@@ -8,7 +8,6 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// Connect to MongoDB
 mongoose
   .connect(process.env.MONGODB_URI)
   .then(() => console.log("MongoDB connected"))
@@ -17,7 +16,6 @@ mongoose
 const authRoutes = require("./routes/auth");
 app.use("/api/auth", authRoutes);
 
-// Basic health check
 app.get("/api/health", (req, res) => {
   res.json({ status: "ok", version: "1.0" });
 });

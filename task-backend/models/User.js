@@ -15,7 +15,6 @@ userSchema.pre("save", async function (next) {
   next();
 });
 
-// Add this right before exporting
 userSchema.set("toJSON", {
   virtuals: true,
   versionKey: false,
