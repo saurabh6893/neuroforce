@@ -78,7 +78,7 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       );
       setUser(data.role);
     } catch (err) {
-      // this is for Fallback to local storage auth
+      //  Fallback to local storage auth
       handleLocalAuth(email, password);
     }
   };

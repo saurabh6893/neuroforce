@@ -1,5 +1,11 @@
-import { useContext, useEffect, useState } from "react";
-import { Routes, Route, Navigate, useNavigate } from "react-router-dom";
+import { useContext, useEffect, useState, useCallback } from "react";
+import {
+  Routes,
+  Route,
+  Navigate,
+  useNavigate,
+  useLocation,
+} from "react-router-dom";
 import { AuthContext } from "./Context/AuthProvider";
 import Login from "./Components/Auth/Login";
 import AdminDashBoard from "./Components/Dashboard/AdminDashBoard";
@@ -9,80 +15,98 @@ import { Admin, Employee } from "./types";
 import "./App.css";
 import { ROUTES } from "./constants/routes";
 import ErrorBoundary from "./Components/Common/ErrorBoundary";
+import { isTokenExpired } from "./utils/auth";
+import { useNavigationBlocker } from "./hooks/ useNavigationBlocker";
 
 function App() {
   const authData = useContext(AuthContext);
-  const [loggerUserData, setLoggedUserData] = useState<Employee | Admin | null>(
+  const [loggedUserData, setLoggedUserData] = useState<Employee | Admin | null>(
     null
   );
   const navigate = useNavigate();
+  const location = useLocation();
+
+  useNavigationBlocker(
+    authData?.user === undefined ||
+      (!!localStorage.getItem("authToken") &&
+        isTokenExpired(localStorage.getItem("authToken")!))
+  );
 
   useEffect(() => {
-    const loggedUser = localStorage.getItem("loggedUser");
-    if (loggedUser) {
-      const userData = JSON.parse(loggedUser);
-      authData?.setUser(userData.role);
-      setLoggedUserData(userData.data);
-
-      if (userData.role === "Admin") {
-        navigate(ROUTES.ADMIN_HOME);
-      } else if (userData.role === "Employee") {
-        navigate(
-          ROUTES.EMPLOYEE_HOME(userData.data.fullName.replace(/\s+/g, "-"))
-        );
+    const initializeAuth = () => {
+      const loggedUser = localStorage.getItem("loggedUser");
+      if (loggedUser) {
+        const userData = JSON.parse(loggedUser);
+        authData?.setUser(userData.role);
+        setLoggedUserData(userData.data);
       }
+    };
+    initializeAuth();
+  }, [authData]);
+
+  useEffect(() => {
+    if (!authData?.user) return;
+
+    const expectedPath =
+      authData.user === "Admin"
+        ? ROUTES.ADMIN_HOME
+        : ROUTES.EMPLOYEE_HOME(
+            loggedUserData?.fullName?.replace(/\s+/g, "-") || ""
+          );
+
+    if (location.pathname !== expectedPath) {
+      navigate(expectedPath, { replace: true });
     }
-  }, [authData?.user, navigate]);
+  }, [authData?.user, loggedUserData?.fullName, navigate, location.pathname]);
 
-  // const handleLogin = (email: string, password: string) => {
-  //   if (email === "admin@example.com" && password === "adminpass") {
-  //     const admin = authData?.adminData?.[0];
-  //     if (admin) {
-  //       authData?.setUser("Admin");
-  //       setLoggedUserData(admin);
-  //       localStorage.setItem(
-  //         "loggedUser",
-  //         JSON.stringify({ role: "Admin", data: admin })
-  //       );
-  //       navigate(ROUTES.ADMIN_HOME);
-  //     }
-  //   } else if (authData) {
-  //     const employee = authData.empData.find(
-  //       (e) => email === e.email && e.password === password
-  //     );
+  const checkAuth = useCallback(async () => {
+    const token = localStorage.getItem("authToken");
+    const storedUser = localStorage.getItem("loggedUser");
 
-  //     if (employee) {
-  //       authData.setUser("Employee");
-  //       setLoggedUserData(employee);
-  //       localStorage.setItem(
-  //         "loggedUser",
-  //         JSON.stringify({ role: "Employee", data: employee })
-  //       );
-  //       navigate(ROUTES.EMPLOYEE_HOME(employee.fullName));
-  //     } else {
-  //       alert("Invalid credentials");
-  //     }
-  //   }
-  // };
+    if (!token || !storedUser) {
+      authData?.setUser("");
+      return;
+    }
+
+    if (isTokenExpired(token)) {
+      localStorage.removeItem("authToken");
+      localStorage.removeItem("loggedUser");
+      authData?.setUser("");
+      navigate(ROUTES.LOGIN, { replace: true });
+      return;
+    }
+
+    try {
+      const response = await fetch("/api/auth/check-auth", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      });
+
+      if (!response.ok) throw new Error("Auth failed");
+
+      const data = await response.json();
+      setLoggedUserData((prev) => ({ ...prev, ...data.userData }));
+    } catch (err) {
+      localStorage.removeItem("authToken");
+      localStorage.removeItem("loggedUser");
+      authData?.setUser("");
+      navigate(ROUTES.LOGIN, { replace: true });
+    }
+  }, [navigate, authData]);
+
+  useEffect(() => {
+    checkAuth();
+    const interval = setInterval(checkAuth, 30000);
+    return () => clearInterval(interval);
+  }, [checkAuth]);
 
   return (
-    <Routes>
+    <Routes location={location} key={location.key}>
       <Route
         path={ROUTES.LOGIN}
-        element={
-          !authData?.user ? (
-            <Login />
-          ) : authData.user === "Admin" ? (
-            <Navigate to="/admin/home" />
-          ) : (
-            <Navigate
-              to={`/employee/${loggerUserData?.fullName?.replace(
-                /\s+/g,
-                "-"
-              )}/home`}
-            />
-          )
-        }
+        element={!authData?.user ? <Login /> : <Navigate to="/" replace />}
       />
 
       <Route
@@ -90,9 +114,9 @@ function App() {
         element={
           <ErrorBoundary>
             {authData?.user === "Admin" ? (
-              <AdminDashBoard data={loggerUserData} />
+              <AdminDashBoard data={loggedUserData} />
             ) : (
-              <Navigate to="/login" />
+              <Navigate to={ROUTES.LOGIN} replace />
             )}
           </ErrorBoundary>
         }
@@ -102,14 +126,14 @@ function App() {
         path={ROUTES.EMPLOYEE_HOME(":fullName")}
         element={
           authData?.user === "Employee" ? (
-            <EmployeeDashboard data={loggerUserData} />
+            <EmployeeDashboard data={loggedUserData} />
           ) : (
-            <Navigate to="/login" />
+            <Navigate to={ROUTES.LOGIN} replace />
           )
         }
       />
 
-      <Route path="/" element={<Navigate to="/login" />} />
+      <Route path="/" element={<Navigate to={ROUTES.LOGIN} replace />} />
       <Route path={ROUTES.NOT_FOUND} element={<NotFound />} />
     </Routes>
   );

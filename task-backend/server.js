@@ -1,4 +1,4 @@
-// backend/server.js
+
 require("dotenv").config();
 const express = require("express");
 const mongoose = require("mongoose");
@@ -14,7 +14,7 @@ mongoose
   .catch((err) => console.error("MongoDB connection error:", err));
 
 const authRoutes = require("./routes/auth");
-app.use("/api/auth", authRoutes);
+app.use(authRoutes);
 
 app.get("/api/health", (req, res) => {
   res.json({ status: "ok", version: "1.0" });

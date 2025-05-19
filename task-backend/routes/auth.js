@@ -1,9 +1,9 @@
 const router = require("express").Router();
 const jwt = require("jsonwebtoken");
-const bcrypt = require("bcrypt"); // Added
+const bcrypt = require("bcrypt");
 const User = require("../models/User");
 
-router.post("/login", async (req, res) => {
+router.post("/api/auth/login", async (req, res) => {
   try {
     const { email, password } = req.body;
 
@@ -15,7 +15,7 @@ router.post("/login", async (req, res) => {
     const token = jwt.sign(
       { userId: user._id, role: user.role },
       process.env.JWT_SECRET,
-      { expiresIn: "1h" }
+      { expiresIn: "2m" }
     );
 
     res.json({
@@ -34,7 +34,7 @@ router.post("/login", async (req, res) => {
   }
 });
 
-router.get("/check-auth", verifyToken, (req, res) => {
+router.get("/api/auth/check-auth", verifyToken, (req, res) => {
   res.json({ user: req.user });
 });
 
@@ -43,7 +43,12 @@ function verifyToken(req, res, next) {
   if (!token) return res.status(401).json({ error: "Unauthorized" });
 
   jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
-    if (err) return res.status(401).json({ error: "Invalid token" });
+    if (err) {
+      if (err.name === "TokenExpiredError") {
+        return res.status(401).json({ error: "Token expired" });
+      }
+      return res.status(401).json({ error: "Invalid token" });
+    }
     req.user = decoded;
     next();
   });

@@ -6,12 +6,13 @@ const Login = () => {
   const [password, setPassword] = useState<string>("");
   const authData = useContext(AuthContext);
 
-  const submitFunc = (e: FormEvent<HTMLFormElement>) => {
+  const submitFunc = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-
-    authData?.loginWithBackend(email, password);
-    setEmail("");
-    setPassword("");
+    try {
+      await authData?.loginWithBackend(email, password);
+    } catch (err) {
+      console.error("Login failed:", err);
+    }
   };
 
   return (

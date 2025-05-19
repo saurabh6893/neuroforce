@@ -5,6 +5,7 @@ import CreateTask from "../Others/CreateTask";
 import Header from "../Others/Header";
 import { getLocalStorage } from "../../utils/localStorage";
 import ErrorBoundary from "../Common/ErrorBoundary";
+import { useNavigationBlocker } from "../../hooks/ useNavigationBlocker";
 
 const AdminDashBoard = ({ data }: EmployeeDashboardProps) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -14,6 +15,9 @@ const AdminDashBoard = ({ data }: EmployeeDashboardProps) => {
   const [tasks, setTasks] = useState<{ employeeName: string; task: Task }[]>(
     []
   );
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+
+  useNavigationBlocker(hasUnsavedChanges);
 
   const fetchAllTasks = () => {
     const { empData } = getLocalStorage();
@@ -24,6 +28,7 @@ const AdminDashBoard = ({ data }: EmployeeDashboardProps) => {
       }))
     );
     setTasks(allTasks);
+    setHasUnsavedChanges(false);
   };
 
   useEffect(() => {
@@ -42,7 +47,10 @@ const AdminDashBoard = ({ data }: EmployeeDashboardProps) => {
         <div className="mt-10 flex justify-end">
           <select
             value={sortType}
-            onChange={(e) => setSortType(e.target.value as any)}
+            onChange={(e) => {
+              setSortType(e.target.value as any);
+              setHasUnsavedChanges(true);
+            }}
             className="bg-[#2d2d2d] text-white p-2 rounded border border-gray-600 focus:outline-none focus:ring-1 focus:ring-blue-400">
             <option value="name">Sort by Name A-Z</option>
             <option value="statusAsc">Status: Failed → Completed</option>
@@ -62,8 +70,8 @@ const AdminDashBoard = ({ data }: EmployeeDashboardProps) => {
               </div>
               <CreateTask
                 onSuccess={() => {
-                  fetchAllTasks(); // 🔁 Refresh task list
-                  setIsModalOpen(false); // ❌ Close modal
+                  fetchAllTasks();
+                  setIsModalOpen(false);
                 }}
               />
             </div>
