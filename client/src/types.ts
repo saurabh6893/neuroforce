@@ -4,9 +4,11 @@ export type Task = {
   description: string;
   date: string;
   active: boolean;
+  assignee?: any;
   newTask: boolean;
   completed: boolean;
   failed: boolean;
+  _id?: any;
 };
 
 export type Employee = {
@@ -39,4 +41,4 @@ export interface EmployeeDashboardProps {
   data: Employee | Admin | null;
 }
 
-export type UserRole = "Admin" | "Employee" | "";
+export type UserRole = "admin" | "employee" | "";

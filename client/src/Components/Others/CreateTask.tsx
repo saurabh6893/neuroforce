@@ -1,57 +1,53 @@
 import { useEffect, useState } from "react";
-import { getLocalStorage } from "../../utils/localStorage";
+import { createTask } from "../../api/taskApi";
 import InputField from "./InputFeild";
 
-const CreateTask = ({ onSuccess }: { onSuccess: () => void }) => {
+import { getEmployees } from "../../api/employeeApi";
+
+const CreateTask = ({ onSuccess }: any) => {
   const [taskTitle, setTaskTitle] = useState("");
   const [taskDescription, setTaskDescription] = useState("");
   const [taskDate, setTaskDate] = useState("");
   const [assignee, setAssignee] = useState("");
   const [category, setCategory] = useState("");
-  const [assigneeList, setAssigneeList] = useState<string[]>([]);
+  const [assigneeList, setAssigneeList] = useState([]);
 
   useEffect(() => {
-    const { empData } = getLocalStorage();
-    const names = empData.map((emp: any) => emp.fullName);
-    setAssigneeList(names);
+    async function fetchEmployees() {
+      try {
+        const response = await getEmployees();
+        setAssigneeList(response.data.map((emp) => emp.email));
+      } catch (err) {
+        console.error("Failed to fetch employees", err);
+      }
+    }
+    fetchEmployees();
   }, []);
 
-  const SubmitTask = (e: React.FormEvent) => {
+  const SubmitTask = async (e) => {
     e.preventDefault();
-
-    const task = {
-      title: taskTitle,
-      description: taskDescription,
-      date: taskDate,
-      category,
-      assignee,
-      active: false,
-      newTask: true,
-      completed: false,
-      failed: false,
-    };
-
-    const { empData } = getLocalStorage();
-
-    const updatedEmpData = empData.map((emp: any) => {
-      if (emp.fullName === assignee) {
-        return {
-          ...emp,
-          tasks: [...emp.tasks, task],
-        };
-      }
-      return emp;
-    });
-
-    localStorage.setItem("Employee", JSON.stringify(updatedEmpData));
-
-    setTaskTitle("");
-    setTaskDescription("");
-    setTaskDate("");
-    setCategory("");
-    setAssignee("");
-
-    onSuccess();
+    try {
+      const task = {
+        title: taskTitle,
+        description: taskDescription,
+        date: taskDate,
+        category,
+        assignee,
+        active: false,
+        newTask: true,
+        completed: false,
+        failed: false,
+      };
+      await createTask(task);
+      setTaskTitle("");
+      setTaskDescription("");
+      setTaskDate("");
+      setCategory("");
+      setAssignee("");
+      onSuccess();
+    } catch (err) {
+      alert("Failed to create task! Did you enter all fields?\n" + err);
+    }
   };
 
   return (
@@ -70,13 +66,23 @@ const CreateTask = ({ onSuccess }: { onSuccess: () => void }) => {
             placeholder="Make a UI design"
           />
 
-          <InputField
-            label="Assign To"
-            type="select"
-            value={assignee}
-            onChange={(e) => setAssignee(e.target.value)}
-            options={assigneeList}
-          />
+          <div>
+            <label htmlFor="assignee" className="block text-gray-200">
+              Assign To (employee email)
+            </label>
+            <select
+              id="assignee"
+              value={assignee}
+              onChange={(e) => setAssignee(e.target.value)}
+              className="mt-1 block w-full ...">
+              <option value="">--Select Employee--</option>
+              {assigneeList.map((email) => (
+                <option key={email} value={email}>
+                  {email}
+                </option>
+              ))}
+            </select>
+          </div>
 
           <InputField
             label="Date"

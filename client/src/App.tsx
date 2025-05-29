@@ -24,7 +24,6 @@ function App() {
     null
   );
   const navigate = useNavigate();
-  const location = useLocation();
 
   useNavigationBlocker(
     authData?.user === undefined ||
@@ -44,27 +43,16 @@ function App() {
     initializeAuth();
   }, [authData]);
 
-  useEffect(() => {
-    if (!authData?.user) return;
-
-    const expectedPath =
-      authData.user === "Admin"
-        ? ROUTES.ADMIN_HOME
-        : ROUTES.EMPLOYEE_HOME(
-            loggedUserData?.fullName?.replace(/\s+/g, "-") || ""
-          );
-
-    if (location.pathname !== expectedPath) {
-      navigate(expectedPath, { replace: true });
-    }
-  }, [authData?.user, loggedUserData?.fullName, navigate, location.pathname]);
-
   const checkAuth = useCallback(async () => {
     const token = localStorage.getItem("authToken");
     const storedUser = localStorage.getItem("loggedUser");
 
-    if (!token || !storedUser) {
+    if (!token || !storedUser || isTokenExpired(token)) {
+      localStorage.removeItem("authToken");
+      localStorage.removeItem("loggedUser");
       authData?.setUser("");
+      setLoggedUserData(null);
+      navigate(ROUTES.LOGIN, { replace: true });
       return;
     }
 
@@ -103,29 +91,42 @@ function App() {
   }, [checkAuth]);
 
   return (
-    <Routes location={location} key={location.key}>
+    <Routes>
       <Route
         path={ROUTES.LOGIN}
-        element={!authData?.user ? <Login /> : <Navigate to="/" replace />}
+        element={
+          !authData?.user ? (
+            <Login />
+          ) : authData?.user === "admin" ? (
+            <Navigate to={ROUTES.ADMIN_HOME} replace />
+          ) : (
+            <Navigate
+              to={ROUTES.EMPLOYEE_HOME(
+                (loggedUserData?.fullName || "").replace(/\s+/g, "-")
+              )}
+              replace
+            />
+          )
+        }
       />
 
       <Route
         path={ROUTES.ADMIN_HOME}
         element={
-          <ErrorBoundary>
-            {authData?.user === "Admin" ? (
+          authData?.user === "admin" ? (
+            <ErrorBoundary>
               <AdminDashBoard data={loggedUserData} />
-            ) : (
-              <Navigate to={ROUTES.LOGIN} replace />
-            )}
-          </ErrorBoundary>
+            </ErrorBoundary>
+          ) : (
+            <Navigate to={ROUTES.LOGIN} replace />
+          )
         }
       />
 
       <Route
         path={ROUTES.EMPLOYEE_HOME(":fullName")}
         element={
-          authData?.user === "Employee" ? (
+          authData?.user === "employee" ? (
             <EmployeeDashboard data={loggedUserData} />
           ) : (
             <Navigate to={ROUTES.LOGIN} replace />

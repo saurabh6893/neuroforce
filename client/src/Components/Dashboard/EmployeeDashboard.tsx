@@ -1,22 +1,35 @@
-import { Navigate, useParams } from "react-router-dom";
-import { EmployeeDashboardProps } from "../../types";
+import { useEffect, useState } from "react";
+import { getMyTasks } from "../../api/taskApi";
+import TaskList from "../TaskList/TaskList";
 import Header from "../Others/Header";
 import TaskListNumbers from "../Others/TaskListNumbers";
-import TaskList from "../TaskList/TaskList";
+import { useParams, Navigate } from "react-router-dom";
+import ErrorBoundary from "../Common/ErrorBoundary";
 import { ROUTES } from "../../constants/routes";
+import { Task } from "../../types";
 
-const EmployeeDashboard = ({ data }: EmployeeDashboardProps) => {
+const EmployeeDashboard = ({ data }: any) => {
   const { fullName } = useParams();
-  if (data?.fullName?.replace(/\s+/g, "-") !== fullName) {
+  const [tasks, setTasks] = useState<Task[]>([]);
+
+  const fetchTasks = () => getMyTasks().then((res) => setTasks(res.data));
+
+  useEffect(() => {
+    fetchTasks();
+  }, []);
+
+  if (!data?.fullName || data.fullName.replace(/\s+/g, "-") !== fullName) {
     return <Navigate to={ROUTES.LOGIN} replace />;
   }
 
   return (
-    <div className="p-10 bg-[#1c1c1c] h-screen">
-      <Header data={data} />
-      <TaskListNumbers data={data} />
-      <TaskList data={data} key={data?.id} />
-    </div>
+    <ErrorBoundary>
+      <div className="p-10 bg-[#1c1c1c] h-screen">
+        <Header data={data} />
+        <TaskListNumbers tasks={tasks} />
+        <TaskList tasks={tasks} refetch={fetchTasks} />
+      </div>
+    </ErrorBoundary>
   );
 };
 

@@ -1,55 +1,21 @@
-import { useMemo, useEffect, useState } from "react";
-import { Employee, EmployeeDashboardProps } from "../../types";
+import { Task } from "../../types";
 import { getStatusColor } from "../../utils/Statuses";
-import { getLocalStorage } from "../../utils/localStorage";
 import ErrorBoundary from "../Common/ErrorBoundary";
+import { useMemo } from "react";
 
 type TaskStatus = "newTask" | "completed" | "active" | "failed";
+type StatusCard = { key: TaskStatus; label: string; count: number };
+type TaskListNumbersProps = { tasks: Task[] };
 
-interface StatusCard {
-  key: TaskStatus;
-  label: string;
-  count: number;
-}
-
-const TaskListNumbers = ({ data }: EmployeeDashboardProps) => {
-  const [localData, setLocalData] = useState<Employee>(() => {
-    const { empData } = getLocalStorage();
-    return empData.find((emp: any) => emp.id === data?.id) || data;
-  });
-
-  useEffect(() => {
-    const { empData } = getLocalStorage();
-    const currentEmployee = empData.find((emp: any) => emp.id === data?.id);
-    if (currentEmployee) setLocalData(currentEmployee);
-
-    const interval = setInterval(() => {
-      const { empData } = getLocalStorage();
-      const currentEmployee = empData.find((emp: any) => emp.id === data?.id);
-
-      if (
-        currentEmployee &&
-        JSON.stringify(currentEmployee.tasks) !==
-          JSON.stringify(localData?.tasks)
-      ) {
-        setLocalData(currentEmployee);
-      }
-    }, 300);
-    return () => clearInterval(interval);
-  }, [data?.id]);
-
-  if (!localData || !("tasks" in localData)) {
-    return null;
-  }
-
+const TaskListNumbers = ({ tasks }: TaskListNumbersProps) => {
   const counts = useMemo(
     () => ({
-      newTask: localData.tasks.filter((t) => t.newTask).length,
-      completed: localData.tasks.filter((t) => t.completed).length,
-      active: localData.tasks.filter((t) => t.active).length,
-      failed: localData.tasks.filter((t) => t.failed).length,
+      newTask: tasks.filter((t) => t.newTask).length,
+      completed: tasks.filter((t) => t.completed).length,
+      active: tasks.filter((t) => t.active).length,
+      failed: tasks.filter((t) => t.failed).length,
     }),
-    [localData.tasks]
+    [tasks]
   );
 
   const statusCards: StatusCard[] = [

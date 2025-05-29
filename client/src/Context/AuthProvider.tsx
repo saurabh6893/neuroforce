@@ -21,7 +21,7 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   useEffect(() => {
     // localStorage.clear();
-    if (!localStorage.getItem("Employee") || !localStorage.getItem("Admin")) {
+    if (!localStorage.getItem("employee") || !localStorage.getItem("admin")) {
       setLocalStorage();
     }
 
@@ -29,15 +29,14 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     setUserData({ empData, adminData });
   }, []);
 
-  // Extracting existing auth logic into a reusable function
   const handleLocalAuth = (email: string, password: string) => {
     if (email === "admin@example.com" && password === "adminpass") {
       const admin = userData.adminData?.[0];
       if (admin) {
-        setUser("Admin");
+        setUser("admin");
         localStorage.setItem(
           "loggedUser",
-          JSON.stringify({ role: "Admin", data: admin })
+          JSON.stringify({ role: "admin", data: admin })
         );
       }
     } else {
@@ -46,10 +45,10 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       );
 
       if (employee) {
-        setUser("Employee");
+        setUser("employee");
         localStorage.setItem(
           "loggedUser",
-          JSON.stringify({ role: "Employee", data: employee })
+          JSON.stringify({ role: "employee", data: employee })
         );
       } else {
         alert("Invalid credentials");
@@ -78,7 +77,6 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       );
       setUser(data.role);
     } catch (err) {
-      //  Fallback to local storage auth
       handleLocalAuth(email, password);
     }
   };

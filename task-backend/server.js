@@ -1,4 +1,3 @@
-
 require("dotenv").config();
 const express = require("express");
 const mongoose = require("mongoose");
@@ -15,6 +14,12 @@ mongoose
 
 const authRoutes = require("./routes/auth");
 app.use(authRoutes);
+
+const employeesRoute = require("./routes/employees");
+app.use("/api/employees", employeesRoute);
+
+const tasksRoutes = require("./routes/tasks");
+app.use("/api/tasks", tasksRoutes);
 
 app.get("/api/health", (req, res) => {
   res.json({ status: "ok", version: "1.0" });
